@@ -16,7 +16,7 @@ namespace InheritanceSerialization.Tests
         {
             var r = new ResourceInfo() { ResourceProperty = "Hola" };
 
-            var xml = InheritanceSerializerNodeDiscriminator.Serialize(r);
+            var xml = InheritanceSerializer.Serialize(r,DiscriminatorType.Node);
 
             Assert.AreEqual(resourceInfoXml, xml);
         }
@@ -24,7 +24,7 @@ namespace InheritanceSerialization.Tests
         [TestMethod]
         public void NodeDiscriminator_DeserializeSimple()
         {
-            var resourceInfo = InheritanceSerializerNodeDiscriminator.Deserialize(resourceInfoXml) as ResourceInfo;
+            var resourceInfo = InheritanceSerializer.Deserialize(resourceInfoXml, DiscriminatorType.Node) as ResourceInfo;
             Assert.AreEqual("Hola", resourceInfo.ResourceProperty);
         }
 
@@ -34,7 +34,7 @@ namespace InheritanceSerialization.Tests
         {
             var r = new VideoInfo() { ResourceProperty = "Maestro", VideoProperty = "Soy Video" };
 
-            var xml = InheritanceSerializerNodeDiscriminator.Serialize(r);
+            var xml = InheritanceSerializer.Serialize(r, DiscriminatorType.Node);
 
             Assert.AreEqual(videoResourceXml, xml);
         }
@@ -42,7 +42,7 @@ namespace InheritanceSerialization.Tests
         [TestMethod]
         public void NodeDiscriminator_DeserializeVideo()
         {
-            var deserialized = InheritanceSerializerNodeDiscriminator.Deserialize(videoResourceXml);
+            var deserialized = InheritanceSerializer.Deserialize(videoResourceXml, DiscriminatorType.Node);
             var resourceInfo = deserialized as ResourceInfo;
             var videoInfo = deserialized as VideoInfo;
 

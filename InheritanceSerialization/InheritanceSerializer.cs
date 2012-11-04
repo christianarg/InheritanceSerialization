@@ -21,7 +21,7 @@ namespace InheritanceSerialization
     {
         private const string DISCRIMINATOR = "discriminator";
 
-        public static string Serialize(object info)
+        public static string Serialize(object info, DiscriminatorType discriminatorType = DiscriminatorType.Attribute)
         {
             var serializer = new XmlSerializer(info.GetType());
             using (var stream = new MemoryStream())
@@ -33,27 +33,26 @@ namespace InheritanceSerialization
                 // Open serialization output
                 var xmlDocument = new XmlDocument();
                 xmlDocument.Load(stream);
+
                 // Add a "discriminador" based on the real type, to use it during deserialization
-                var node = xmlDocument.CreateAttribute("", DISCRIMINATOR, "");
-                node.InnerText = GetTypeFullName_With_AssemblyName_WihoutVersion(info.GetType());
-                xmlDocument.DocumentElement.Attributes.Append(node);
+                var discriminatorPolicy = DiscriminatotyPolicyFactory.GetDiscriminatorPolicy(discriminatorType);
+                discriminatorPolicy.CreateDiscriminator(info, xmlDocument);
 
                 // return the xml with the discriminator
                 return xmlDocument.OuterXml;
             }
         }
 
-        public static object Deserialize(string xml)
+        public static object Deserialize(string xml, DiscriminatorType discriminatorType = DiscriminatorType.Attribute)
         {
             var xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(xml);
 
-            // read "discriminator"
-            var discriminator = xmlDocument.DocumentElement.Attributes[DISCRIMINATOR];
-            var typeName = discriminator.InnerText;
-
+            // read "discriminator" and infer the real type
+            var discriminatorPolicy = DiscriminatotyPolicyFactory.GetDiscriminatorPolicy(discriminatorType);
+                
             // now we know the real type based on the discriminator to deserialize 
-            var serializer = new XmlSerializer(Type.GetType(typeName));
+            var serializer = new XmlSerializer(discriminatorPolicy.RetrieveRealType(xmlDocument));
 
             using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(xml)))
             {
